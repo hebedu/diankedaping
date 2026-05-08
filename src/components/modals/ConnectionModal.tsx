@@ -1,142 +1,97 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, ArrowRightLeft, ArrowRight, MoveHorizontal } from 'lucide-react';
+import { X, Trash2, Network } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import type { Connection } from '../../types';
 
 export const ConnectionModal = () => {
-  const { isConnectionModalOpen, setConnectionModalOpen, pendingConnection, addConnection, updateConnection, removeConnection, devices, groups } = useStore();
+  const { 
+    isConnectionModalOpen, 
+    setConnectionModalOpen, 
+    pendingConnection, 
+    removeConnection,
+    nodes 
+  } = useStore();
   
-  const [formData, setFormData] = useState<Partial<Connection>>({
-    direction: '单向',
-    status: '正常',
-    type: 'default',
-  });
+  if (!isConnectionModalOpen || !pendingConnection) return null;
 
-  useEffect(() => {
-    if (isConnectionModalOpen && pendingConnection) {
-      setFormData({
-        ...pendingConnection,
-        direction: '单向',
-        status: '正常',
-        type: 'default',
-      });
-    }
-  }, [isConnectionModalOpen, pendingConnection]);
-
-  if (!isConnectionModalOpen) return null;
-
-  const handleSave = () => {
-    if (!formData.source || !formData.target) {
-      alert('连线源或目标丢失');
-      return;
-    }
-
-    if (formData.id) {
-      // Edit existing connection
-      updateConnection(formData.id, formData);
-    } else {
-      // Create new connection
-      addConnection({
-        ...formData,
-        id: `c-${Date.now()}`,
-      } as Connection);
-    }
-    
-    setConnectionModalOpen(false);
+  const getElementName = (id?: string) => {
+    if (!id) return '未知';
+    const node = nodes.find(n => n.id === id);
+    return node ? node.name : '未知节点';
   };
 
   const handleDelete = () => {
-    if (formData.id) {
-      if (window.confirm('确定要删除这条连线吗？')) {
-        removeConnection(formData.id);
+    if (pendingConnection?.id) {
+      if (window.confirm('确定要删除这条连接关系吗？')) {
+        removeConnection(pendingConnection.id);
         setConnectionModalOpen(false);
       }
     }
   };
 
-  const getElementName = (id?: string) => {
-    if (!id) return '未知';
-    const device = devices.find(d => d.id === id);
-    if (device) return device.displayName;
-    const group = groups.find(g => g.id === id);
-    if (group) return group.displayName;
-    return '未知';
-  };
-
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-2xl w-[400px] animate-in fade-in zoom-in duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h3 className="text-lg font-bold text-slate-800">{formData.id ? '编辑连线' : '配置连线属性'}</h3>
+      <div className="bg-white rounded-2xl shadow-2xl w-[420px] animate-in fade-in zoom-in duration-200 overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+          <div className="flex items-center space-x-2">
+            <div className="p-1.5 bg-primary/10 rounded-lg">
+              <Network className="w-4 h-4 text-primary" />
+            </div>
+            <h3 className="text-base font-black text-slate-800 tracking-tight">连接关系</h3>
+          </div>
           <button 
             onClick={() => setConnectionModalOpen(false)}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="bg-slate-50 p-3 rounded-md text-sm text-slate-600 flex justify-between items-center border border-slate-100">
-            <div className="font-medium truncate flex-1 text-center" title={getElementName(formData.source)}>{getElementName(formData.source)}</div>
-            <div className="mx-2 flex items-center justify-center">
-              {formData.direction === '双向' ? (
-                <div className="p-1.5 text-slate-500 bg-slate-100 rounded-full shadow-inner mx-1" title="双向连线">
-                  <MoveHorizontal className="w-4 h-4" />
-                </div>
-              ) : (
-                <button
-                  onClick={() => setFormData({ ...formData, source: formData.target, target: formData.source })}
-                  className="p-1.5 rounded-full text-slate-400 hover:text-primary hover:bg-primary/10 transition-all hover:scale-110 active:rotate-180 group"
-                  title="点击互换源和目标节点"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
+        {/* Content */}
+        <div className="p-8 space-y-6">
+          <div className="flex items-center justify-between space-x-4">
+            <div className="flex-1 text-center">
+              <div className="py-3 px-4 bg-slate-50 rounded-xl border border-slate-100 text-xs font-black text-slate-700 truncate shadow-sm">
+                {getElementName(pendingConnection.source)}
+              </div>
             </div>
-            <div className="font-medium truncate flex-1 text-center" title={getElementName(formData.target)}>{getElementName(formData.target)}</div>
+            
+            <div className="flex flex-col items-center pt-4">
+              <div className="h-[2px] w-12 bg-slate-200 rounded-full relative">
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-slate-300 rounded-full border-2 border-white shadow-sm"></div>
+              </div>
+            </div>
+
+            <div className="flex-1 text-center">
+              <div className="py-3 px-4 bg-slate-50 rounded-xl border border-slate-100 text-xs font-black text-slate-700 truncate shadow-sm">
+                {getElementName(pendingConnection.target)}
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700 flex items-center">连线方向</label>
-            <select 
-              value={formData.direction || '单向'}
-              onChange={(e) => setFormData({ ...formData, direction: e.target.value as any })}
-              className="w-full px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm bg-white"
-            >
-
-              <option value="单向">单向</option>
-              <option value="双向">双向</option>
-            </select>
+          <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100/50 flex items-start space-x-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0"></div>
+            <p className="text-xs text-blue-700/80 leading-relaxed font-medium">
+              该连接仅表示两个节点之间存在拓扑关系，不区分方向。
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-6 py-4 bg-slate-50 rounded-b-lg">
-          <div>
-            {formData.id && (
-              <button 
-                onClick={handleDelete}
-                className="px-4 py-2 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 rounded-md transition-colors"
-              >
-                删除连线
-              </button>
-            )}
-          </div>
-          <div className="flex space-x-3">
-            <button 
-              onClick={() => setConnectionModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-md transition-colors"
-            >
-              取消
-            </button>
-            <button 
-              onClick={handleSave}
-              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-md flex items-center space-x-1.5 shadow-md shadow-primary/20 transition-all"
-            >
-              <Save className="w-4 h-4" />
-              <span>{formData.id ? '保存修改' : '确认连线'}</span>
-            </button>
-          </div>
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-5 bg-slate-50/50 border-t border-slate-100">
+          <button 
+            onClick={handleDelete}
+            className="flex items-center space-x-2 px-4 py-2.5 text-xs font-black text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-95 group"
+          >
+            <Trash2 className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
+            <span>删除连接</span>
+          </button>
+          
+          <button 
+            onClick={() => setConnectionModalOpen(false)}
+            className="px-8 py-2.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 text-xs font-black rounded-xl shadow-sm hover:shadow active:scale-95 transition-all"
+          >
+            关闭
+          </button>
         </div>
       </div>
     </div>

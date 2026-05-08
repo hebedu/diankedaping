@@ -11,231 +11,180 @@ import { NodePopoverContent } from './NodePopoverContent';
 import { getSmartSnapPos } from '../../utils/snapHelper';
 
 const iconMap: Record<IconType, React.ReactNode> = {
-  'firewall': <Shield className="w-6 h-6" />,
-  'router': <Network className="w-6 h-6" />,
-  'switch': <SwitchCamera className="w-6 h-6" />,
-  'server': <Server className="w-6 h-6" />,
-  'terminal': <Monitor className="w-6 h-6" />,
-  'middleware': <Layers className="w-6 h-6" />,
-  'database': <Database className="w-6 h-6" />,
-  'gateway': <Globe className="w-6 h-6" />,
+  'firewall': <Shield className="w-5 h-5" />,
+  'router': <Network className="w-5 h-5" />,
+  'switch': <SwitchCamera className="w-5 h-5" />,
+  'server': <Server className="w-5 h-5" />,
+  'terminal': <Monitor className="w-5 h-5" />,
+  'middleware': <Layers className="w-5 h-5" />,
+  'database': <Database className="w-5 h-5" />,
+  'gateway': <Globe className="w-5 h-5" />,
   'cloud': <Cloud className="w-5 h-5" />,
   'subTopology': <LayoutTemplate className="w-5 h-5" />,
-  'group': <LayoutTemplate className="w-6 h-6" />,
+  'group': <LayoutTemplate className="w-5 h-5" />,
 };
 
-export const RegionNode = ({ data, selected }: { data: Region; selected: boolean }) => {
+export const RegionNode = React.memo(({ data, selected }: { data: Region; selected: boolean }) => {
   const allNodes = useStore((state) => state.nodes);
   const updateRegion = useStore((state) => state.updateRegion);
   const removeRegion = useStore((state) => state.removeRegion);
   const setRegionModalOpen = useStore((state) => state.setRegionModalOpen);
   const isPreview = useStore((state) => state.isPreview);
+  const isPreviewMode = useStore((state) => state.isPreviewMode);
   const setHelperLines = useStore((state) => state.setHelperLines);
   const reactFlowInstance = useReactFlow();
   
-  const regionNodes = allNodes.filter(n => n.regionId === data.id);
+  const regionNodes = React.useMemo(() => allNodes.filter(n => n.regionId === data.id), [allNodes, data.id]);
 
-  const themeMap: Record<string, { bg: string, border: string, text: string, solidBg: string }> = {
-    'security': { bg: 'bg-blue-50/30', border: 'border-blue-400', text: 'text-blue-700', solidBg: 'bg-blue-100' },
-    'compute': { bg: 'bg-emerald-50/30', border: 'border-emerald-400', text: 'text-emerald-700', solidBg: 'bg-emerald-100' },
-    'data': { bg: 'bg-amber-50/30', border: 'border-amber-400', text: 'text-amber-700', solidBg: 'bg-amber-100' },
-    'ops': { bg: 'bg-purple-50/30', border: 'border-purple-400', text: 'text-purple-700', solidBg: 'bg-purple-100' },
-    'external': { bg: 'bg-green-50/30', border: 'border-green-400', text: 'text-green-700', solidBg: 'bg-green-100' },
-    'cyan': { bg: 'bg-cyan-50/30', border: 'border-cyan-400', text: 'text-cyan-700', solidBg: 'bg-cyan-100' },
-    'rose': { bg: 'bg-rose-50/30', border: 'border-rose-400', text: 'text-rose-700', solidBg: 'bg-rose-100' },
-    'slate': { bg: 'bg-slate-50/30', border: 'border-slate-400', text: 'text-slate-700', solidBg: 'bg-slate-100' },
+  const themeMap: Record<string, { bg: string, border: string, text: string, pillar: string }> = {
+    'security': { bg: 'bg-blue-50/20', border: 'border-blue-400/60', text: 'text-blue-600', pillar: 'bg-blue-500' },
+    'compute': { bg: 'bg-emerald-50/20', border: 'border-emerald-400/60', text: 'text-emerald-600', pillar: 'bg-emerald-500' },
+    'data': { bg: 'bg-amber-50/20', border: 'border-amber-400/60', text: 'text-amber-600', pillar: 'bg-amber-500' },
+    'ops': { bg: 'bg-purple-50/20', border: 'border-purple-400/60', text: 'text-purple-600', pillar: 'bg-purple-500' },
+    'external': { bg: 'bg-green-50/20', border: 'border-green-400/60', text: 'text-green-600', pillar: 'bg-green-500' },
+    'cyan': { bg: 'bg-cyan-50/20', border: 'border-cyan-400/60', text: 'text-cyan-600', pillar: 'bg-cyan-500' },
+    'rose': { bg: 'bg-rose-50/20', border: 'border-rose-400/60', text: 'text-rose-600', pillar: 'bg-rose-500' },
+    'slate': { bg: 'bg-slate-50/20', border: 'border-slate-400/60', text: 'text-slate-600', pillar: 'bg-slate-500' },
   };
   const theme = themeMap[data.type] || themeMap['compute'];
 
   return (
-    <>
-      <div 
-        className={`relative rounded-3xl border-[1.5px] border-solid transition-all group flex flex-col overflow-hidden ${theme.bg} ${theme.border} ${
-          selected ? 'shadow-[0_0_20px_rgba(59,130,246,0.4)] border-2 !border-primary scale-[1.01]' : 'hover:border-primary/50'
-        }`}
-        style={{ width: '100%', height: '100%' }}
-      >
-        {!isPreview && (
-          <NodeResizer 
-            color="#3B82F6" 
-            isVisible={selected} 
-            minWidth={250} 
-            minHeight={200}
-            handleStyle={{ 
-              width: 14, 
-              height: 14, 
-              backgroundColor: '#fff', 
-              border: '2.5px solid #3B82F6',
-              borderRadius: '6px',
-              boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
-            }}
-            lineStyle={{
-              borderWidth: 2,
-              borderStyle: 'solid',
-              borderColor: '#3B82F6',
-              opacity: 0.6
-            }}
-            onResize={(_, params) => {
-              const allReactFlowNodes = reactFlowInstance.getNodes();
-              const nodeToSnap = {
-                id: data.id,
-                position: { x: params.x, y: params.y },
-                width: params.width,
-                height: params.height,
-                type: 'region'
-              } as any;
-              
-              const snapResult = getSmartSnapPos(nodeToSnap, allReactFlowNodes, 'resize');
-              setHelperLines(snapResult.helperLines);
-
-              if (snapResult.helperLines.length > 0) {
-                reactFlowInstance.setNodes((nodes) =>
-                  nodes.map((n) => {
-                    if (n.id === data.id) {
-                      return { 
-                        ...n, 
-                        position: { x: snapResult.x, y: snapResult.y },
-                        style: { ...n.style, width: snapResult.width, height: snapResult.height }
-                      };
-                    }
-                    return n;
-                  })
-                );
-              }
-            }}
-            onResizeEnd={(_, { x, y, width, height }) => {
-              setHelperLines([]);
-              updateRegion(data.id, { position: { x, y }, width, height });
-            }}
-          />
-        )}
-
-        <div className={`w-full px-5 py-4 flex flex-col border-b border-black/5 shrink-0 ${theme.solidBg}`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2.5">
-              <div className={`p-1.5 rounded-lg bg-white/40 shadow-sm ${theme.text}`}>
-                <LayoutTemplate className="w-4 h-4" />
-              </div>
-              <span className={`text-base font-black tracking-tight ${theme.text}`}>{data.name}</span>
-            </div>
-            
-            <div className="flex items-center space-x-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button 
-                className="w-7 h-7 bg-white/60 hover:bg-white rounded-lg flex items-center justify-center transition-all text-slate-500 hover:text-primary shadow-sm hover:shadow-md"
-                title="编辑区域"
-                onClick={(e) => { e.stopPropagation(); setRegionModalOpen(true, data); }}
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-              </button>
-              <button 
-                className="w-7 h-7 bg-white/60 hover:bg-rose-500 hover:text-white rounded-lg flex items-center justify-center transition-all text-slate-500 shadow-sm hover:shadow-md"
-                title="删除区域"
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  if (regionNodes.length > 0) {
-                    alert('当前区域内存在节点，请先迁移或删除区域内对象。');
-                    return;
-                  }
-                  if (window.confirm(`确定要删除区域 ${data.name} 吗？`)) {
-                    removeRegion(data.id);
-                  }
-                }}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+    <div 
+      className={`relative w-full h-full rounded-[24px] border-2 border-dashed transition-all group ${theme.bg} ${theme.border} ${
+        selected ? 'shadow-lg z-10 !border-solid !border-primary ring-4 ring-primary/10' : 'hover:border-primary/40'
+      }`}
+    >
+      {/* 方案：悬浮式标题 (Floating Title Outside) */}
+      <div className="absolute top-[-34px] left-0 flex items-center justify-between w-full pr-2 animate-in slide-in-from-bottom-2 duration-300">
+        <div className="flex items-center space-x-2">
+          <span className={`text-sm font-black tracking-tight ${theme.text} uppercase`}>{data.name}</span>
         </div>
-        
-        <div className="flex-1 w-full h-full pointer-events-none"></div>
+
+        {!isPreview && !isPreviewMode && (
+          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button 
+              className="p-1.5 hover:bg-white rounded-lg transition-all text-slate-400 hover:text-primary shadow-sm active:scale-90"
+              onClick={(e) => { e.stopPropagation(); setRegionModalOpen(true, data); }}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </button>
+            <button 
+              className="p-1.5 hover:bg-rose-500 hover:text-white rounded-lg transition-all text-slate-400 shadow-sm active:scale-90"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (regionNodes.length > 0) {
+                  alert('当前区域内存在节点，请先迁移或删除区域内对象。');
+                  return;
+                }
+                if (window.confirm(`确定要删除区域 ${data.name} 吗？`)) {
+                  removeRegion(data.id);
+                }
+              }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
-    </>
+
+      {!isPreview && !isPreviewMode && (
+        <NodeResizer 
+          color="#3B82F6" 
+          isVisible={selected} 
+          minWidth={200} 
+          minHeight={150}
+          handleClassName="custom-resizer-handle"
+          lineClassName="custom-resizer-line"
+          onResizeStart={() => useStore.getState().setResizing(true)}
+          onResize={(_, params) => {
+            const allReactFlowNodes = reactFlowInstance.getNodes();
+            const snapResult = getSmartSnapPos({ id: data.id, position: { x: params.x, y: params.y }, width: params.width, height: params.height, type: 'region' } as any, allReactFlowNodes, 'resize', params.direction);
+            setHelperLines(snapResult.helperLines);
+            if (snapResult.helperLines.length > 0) {
+              reactFlowInstance.setNodes(nds => nds.map(n => n.id === data.id ? { ...n, position: { x: snapResult.x, y: snapResult.y }, style: { ...n.style, width: snapResult.width, height: snapResult.height } } : n));
+            }
+          }}
+          onResizeEnd={() => {
+            setHelperLines([]);
+            useStore.getState().setResizing(false);
+            const node = reactFlowInstance.getNode(data.id);
+            if (node) updateRegion(data.id, { position: { x: Math.round(node.position.x), y: Math.round(node.position.y) }, width: Math.round(node.width || 0), height: Math.round(node.height || 0) });
+          }}
+        />
+      )}
+      <div className="flex-1 w-full h-full pointer-events-none"></div>
+    </div>
   );
-};
+});
 
-// ==========================================
-// 统一节点组件 (Unified Node)
-// ==========================================
-export const UnifiedNode = ({ data, selected, dragging }: { data: TopologyNode; selected: boolean, dragging: boolean }) => {
+export const UnifiedNode = React.memo(({ data, selected, dragging }: { data: TopologyNode; selected: boolean, dragging: boolean }) => {
   const [isHovered, setIsHovered] = React.useState(false);
-  const { isConnectionMode, isConnectingLine, setViewMode, isPreview, availableDevices, availableSubTopologies } = useStore();
-  
-  const handleClass = `!w-2.5 !h-2.5 !bg-white !border-[2px] !border-primary transition-opacity duration-200 ${
-    (selected || isConnectionMode || isHovered || isConnectingLine) ? 'opacity-100 !pointer-events-auto' : 'opacity-0 pointer-events-none'
-  }`;
+  const isConnectionMode = useStore(s => s.isConnectionMode);
+  const isConnectingLine = useStore(s => s.isConnectingLine);
+  const isPreview = useStore(s => s.isPreview);
+  const isPreviewMode = useStore(s => s.isPreviewMode);
+  const isResizing = useStore(s => s.isResizing);
 
-  const isSubTopology = data.relationType === 'subTopology';
-  const isDevice = data.relationType === 'device';
-
-  // Get associated devices details
-  const nodeDevices = React.useMemo(() => {
-    if (!isDevice || !data.relatedDeviceIds) return [];
-    return availableDevices.filter(d => data.relatedDeviceIds?.includes(d.id));
-  }, [isDevice, data.relatedDeviceIds, availableDevices]);
-
-
-  const subTopologyName = React.useMemo(() => {
-    if (!isSubTopology || !data.relatedTopologyId) return '未知子拓扑';
-    return availableSubTopologies.find(t => t.id === data.relatedTopologyId)?.name || '未知子拓扑';
-  }, [isSubTopology, data.relatedTopologyId, availableSubTopologies]);
+  const handleClass = `!w-2 !h-2 !bg-white !border-[2px] !border-primary transition-all duration-200 ${
+    (selected || isConnectionMode || isHovered || isConnectingLine) && !isResizing 
+      ? 'opacity-100 scale-100 !pointer-events-auto' 
+      : 'opacity-0 scale-50 pointer-events-none'
+  } hover:!scale-150 hover:!bg-primary hover:!border-white`;
 
   return (
     <div 
-      className="group"
+      className={`relative flex flex-col items-center justify-center w-[80px] group transition-all ${
+        selected ? 'z-50 scale-105' : 'z-10'
+      }`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {!isPreview && (
-        <NodeToolbar isVisible={isHovered && !selected && !dragging && !isConnectionMode && !isConnectingLine} position={Position.Right} offset={15}>
+      {/* 图标核心区 - 所有的连线锚点都在这里 */}
+      <div className={`relative w-16 h-16 flex items-center justify-center rounded-2xl transition-all duration-300 ${
+        selected ? 'bg-white shadow-lg ring-2 ring-primary border-primary' : 'bg-white/40 backdrop-blur-[2px] border border-slate-200/40 hover:border-primary/40 shadow-sm'
+      }`}>
+        {/* Handles 聚焦在图标周围 */}
+        <Handle type="target" position={FlowPosition.Left} className={`${handleClass} !-left-1`} id="left-t" />
+        <Handle type="target" position={FlowPosition.Right} className={`${handleClass} !-right-1`} id="right-t" />
+        <Handle type="target" position={FlowPosition.Top} className={`${handleClass} !-top-1`} id="top-t" />
+        <Handle type="target" position={FlowPosition.Bottom} className={`${handleClass} !-bottom-1`} id="bottom-t" />
+        <Handle type="source" position={FlowPosition.Left} className={`${handleClass} !-left-1`} id="left-s" />
+        <Handle type="source" position={FlowPosition.Right} className={`${handleClass} !-right-1`} id="right-s" />
+        <Handle type="source" position={FlowPosition.Top} className={`${handleClass} !-top-1`} id="top-s" />
+        <Handle type="source" position={FlowPosition.Bottom} className={`${handleClass} !-bottom-1`} id="bottom-s" />
+
+        {/* 全局连接触发区 */}
+        <Handle 
+          type="target" 
+          position={FlowPosition.Top} 
+          className={`!w-full !h-full !top-0 !left-0 !bg-transparent !border-none !opacity-0 ${isConnectingLine ? 'z-[40] !pointer-events-auto cursor-crosshair' : '!pointer-events-none'}`} 
+          id="full-icon-target" 
+        />
+
+        <div className="text-primary transition-all group-hover:scale-110">
+          {React.cloneElement((iconMap[data.iconType] || iconMap['server']) as React.ReactElement<any>, { strokeWidth: 1.5, className: 'w-10 h-10' })}
+        </div>
+
+        {/* 连线时的靶心 */}
+        {isConnectingLine && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+            <div className="w-6 h-6 border border-primary/10 rounded-full animate-pulse" />
+          </div>
+        )}
+      </div>
+
+      {!isPreview && !isPreviewMode && (
+        <NodeToolbar isVisible={isHovered && !selected && !dragging && !isConnectionMode && !isConnectingLine && !isResizing} position={Position.Right} offset={10}>
           <NodePopoverContent type="node" id={data.id} compact={true} />
         </NodeToolbar>
       )}
       
-      <div 
-        className={`bg-white rounded-2xl border-2 border-slate-100 flex flex-col items-center justify-center p-4 w-32 transition-all relative ${
-          selected ? 'shadow-[0_0_25px_rgba(59,130,246,0.3)] ring-4 ring-primary/10 border-primary scale-105 z-50' : 
-          'hover:border-primary/40 shadow-lg shadow-slate-200/50'
-        }`}
-        onDoubleClick={() => {
-          if (isSubTopology && data.relatedTopologyId) {
-            setViewMode('sub', data.relatedTopologyId);
-          }
-        }}
-      >
-        {/* Handles */}
-        <Handle type="source" position={FlowPosition.Left} className={`${handleClass} !-left-1.5`} id="left-s" />
-        <Handle type="source" position={FlowPosition.Right} className={`${handleClass} !-right-1.5`} id="right-s" />
-        <Handle type="source" position={FlowPosition.Top} className={`${handleClass} !-top-1.5`} id="top-s" />
-        <Handle type="source" position={FlowPosition.Bottom} className={`${handleClass} !-bottom-1.5`} id="bottom-s" />
-        
-        <Handle type="target" position={FlowPosition.Left} className={`${handleClass} !-left-1.5 opacity-0`} id="left-t" />
-        <Handle type="target" position={FlowPosition.Right} className={`${handleClass} !-right-1.5 opacity-0`} id="right-t" />
-        <Handle type="target" position={FlowPosition.Top} className={`${handleClass} !-top-1.5 opacity-0`} id="top-t" />
-        <Handle type="target" position={FlowPosition.Bottom} className={`${handleClass} !-bottom-1.5 opacity-0`} id="bottom-t" />
-        
-        <Handle 
-          type="target" 
-          position={FlowPosition.Top} 
-          className={`!w-full !h-full !top-0 !left-0 !bg-transparent !border-none !rounded-2xl transition-all ${isConnectingLine ? 'z-[100] !pointer-events-auto cursor-crosshair' : '!pointer-events-none'}`} 
-          id="node-card-target" 
-        />
-
-
-        {/* Icon Area */}
-        <div className={`relative w-14 h-14 flex items-center justify-center rounded-2xl bg-blue-50/50 text-primary mb-3 shadow-inner`}>
-          {React.cloneElement((iconMap[data.iconType] || iconMap['server']) as React.ReactElement<any>, { strokeWidth: 1.5 })}
-        </div>
-        
-        {/* Text Area */}
-        <div className="flex flex-col items-center w-full text-center px-1">
-          <div className="text-xs font-bold text-slate-800 truncate w-full" title={data.name}>
-            {data.name}
-          </div>
-          <div className="text-[10px] font-semibold text-slate-400 mt-1 truncate w-full font-mono uppercase tracking-tight">
-            {isSubTopology ? `子拓扑: ${subTopologyName}` : (nodeDevices.length > 1 ? `${nodeDevices.length} 个设备` : (nodeDevices[0]?.ip || '未关联设备'))}
-          </div>
+      {/* 悬浮文字区 */}
+      <div className="mt-1.5 w-full text-center px-0.5">
+        <div className={`text-[9px] font-bold leading-tight truncate transition-colors ${selected ? 'text-primary' : 'text-slate-500'}`} title={data.name}>
+          {data.name}
         </div>
       </div>
     </div>
   );
-};
+});

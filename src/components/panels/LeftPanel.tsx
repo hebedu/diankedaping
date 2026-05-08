@@ -58,12 +58,6 @@ export const LeftPanel = () => {
   }, [nodes, searchTerm]);
 
   const renderNodeItem = (node: TopologyNode) => {
-    const getAssociationText = () => {
-      if (node.relationType === 'device') return node.relatedDeviceIp || '已关联设备';
-      if (node.relationType === 'subTopology') return `子拓扑：${node.relatedTopologyName}`;
-      return node.ip || '未关联对象';
-    };
-
     return (
       <div
         key={node.id}
@@ -75,7 +69,6 @@ export const LeftPanel = () => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-xs font-bold text-slate-700 truncate">{node.name}</div>
-          <div className="text-[10px] text-slate-400 truncate font-mono mt-0.5">{getAssociationText()}</div>
         </div>
         
         <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity space-x-1">
@@ -111,17 +104,16 @@ export const LeftPanel = () => {
   };
 
   return (
-    <div className={`relative flex transition-all duration-300 ease-in-out h-full ${isLeftPanelOpen ? 'w-80' : 'w-0'}`}>
+    <div className={`relative flex transition-all duration-300 ease-in-out h-full ${isLeftPanelOpen ? 'w-72' : 'w-0'}`}>
       <button 
         onClick={() => setLeftPanelOpen(!isLeftPanelOpen)}
-        className={`absolute top-1/2 -translate-y-1/2 -right-3 z-[100] w-6 h-12 bg-white border border-slate-200 rounded-lg shadow-md flex items-center justify-center text-slate-400 hover:text-primary transition-all hover:scale-105 active:scale-95 group`}
+        className={`absolute top-1/2 -translate-y-1/2 -right-3 z-50 w-6 h-12 bg-white border border-slate-200 rounded-lg shadow-md flex items-center justify-center text-slate-400 hover:text-primary transition-all hover:scale-105 active:scale-95 group`}
         title={isLeftPanelOpen ? "收起节点管理" : "展开节点管理"}
       >
         {isLeftPanelOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
       </button>
 
-      <div className={`w-80 bg-white border-r border-slate-200 flex flex-col h-full z-10 shadow-xl overflow-hidden font-sans transition-opacity duration-200 ${isLeftPanelOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        {/* Header Section */}
+      <div className={`w-72 bg-white border-r border-slate-200 flex flex-col h-full z-10 shadow-xl overflow-hidden font-sans transition-opacity duration-200 ${isLeftPanelOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className="p-4 border-b border-slate-100 bg-slate-50/30">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
@@ -143,7 +135,7 @@ export const LeftPanel = () => {
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" />
             <input 
               type="text" 
-              placeholder="搜索节点名称 / IP / 关联对象" 
+              placeholder="请搜索节点名称" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 text-xs bg-white border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all placeholder:text-slate-400 shadow-sm"
@@ -151,7 +143,6 @@ export const LeftPanel = () => {
           </div>
         </div>
 
-        {/* Node List */}
         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-slate-50/10">
           {filteredNodes.length > 0 ? (
             <div>

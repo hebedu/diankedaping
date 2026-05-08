@@ -5,31 +5,33 @@ export interface HelperLine {
   position: number;
 }
 
-const SNAP_THRESHOLD = 8;
+const SNAP_THRESHOLD = 10; // 缩放时稍微增加灵敏度
 
 export const getSmartSnapPos = (
   node: Node,
   allNodes: Node[],
-  mode: 'drag' | 'resize' = 'drag'
+  mode: 'drag' | 'resize' = 'drag',
+  direction?: number[] // [x, y] 其中 x,y 为 -1, 0, 1，表示拉动的方向
 ) => {
   const result = {
     x: node.position.x,
     y: node.position.y,
-    width: node.width || 0,
-    height: node.height || 0,
+    width: node.width || node.style?.width || 0,
+    height: node.height || node.style?.height || 0,
     helperLines: [] as HelperLine[],
   };
 
-  const nodeWidth = node.width || 0;
-  const nodeHeight = node.height || 0;
+  // 确保宽度高度是数值
+  const nodeWidth = typeof result.width === 'number' ? result.width : parseInt(String(result.width));
+  const nodeHeight = typeof result.height === 'number' ? result.height : parseInt(String(result.height));
   
   const nodeBounds = {
-    left: node.position.x,
-    right: node.position.x + nodeWidth,
-    hCenter: node.position.x + nodeWidth / 2,
-    top: node.position.y,
-    bottom: node.position.y + nodeHeight,
-    vCenter: node.position.y + nodeHeight / 2,
+    left: result.x,
+    right: result.x + nodeWidth,
+    hCenter: result.x + nodeWidth / 2,
+    top: result.y,
+    bottom: result.y + nodeHeight,
+    vCenter: result.y + nodeHeight / 2,
   };
 
   const otherNodes = allNodes.filter(n => n.id !== node.id && n.type === 'region');
@@ -40,8 +42,8 @@ export const getSmartSnapPos = (
   for (const other of otherNodes) {
     const oX = other.position.x;
     const oY = other.position.y;
-    const oW = other.width || 0;
-    const oH = other.height || 0;
+    const oW = (other.width || other.style?.width || 0) as number;
+    const oH = (other.height || other.style?.height || 0) as number;
 
     const oBounds = {
       left: oX,
@@ -52,7 +54,7 @@ export const getSmartSnapPos = (
       vCenter: oY + oH / 2,
     };
 
-    // --- 水平方向 (X 轴 / Width) ---
+    // --- 水平方向 ---
     if (!snappedX) {
       const candidates = [
         { flow: oBounds.left, type: 'vertical' },
@@ -61,41 +63,37 @@ export const getSmartSnapPos = (
       ];
 
       for (const cand of candidates) {
-        // 拖拽模式：吸附整个节点
         if (mode === 'drag') {
           if (Math.abs(nodeBounds.left - cand.flow) < SNAP_THRESHOLD) {
             result.x = cand.flow;
             result.helperLines.push({ type: 'vertical', position: cand.flow });
-            snappedX = true;
-            break;
+            snappedX = true; break;
           }
           if (Math.abs(nodeBounds.right - cand.flow) < SNAP_THRESHOLD) {
             result.x = cand.flow - nodeWidth;
             result.helperLines.push({ type: 'vertical', position: cand.flow });
-            snappedX = true;
-            break;
+            snappedX = true; break;
           }
-        } 
-        // 缩放模式：吸附边缘
-        else {
-          if (Math.abs(nodeBounds.right - cand.flow) < SNAP_THRESHOLD) {
-            result.width = cand.flow - nodeBounds.left;
+        } else if (direction) {
+          // 缩放模式：仅对正在移动的边缘进行吸附
+          // 拉动右侧 (direction[0] === 1)
+          if (direction[0] === 1 && Math.abs(nodeBounds.right - cand.flow) < SNAP_THRESHOLD) {
+            result.width = Math.max(100, cand.flow - nodeBounds.left);
             result.helperLines.push({ type: 'vertical', position: cand.flow });
-            snappedX = true;
-            break;
+            snappedX = true; break;
           }
-          if (Math.abs(nodeBounds.left - cand.flow) < SNAP_THRESHOLD) {
+          // 拉动左侧 (direction[0] === -1)
+          if (direction[0] === -1 && Math.abs(nodeBounds.left - cand.flow) < SNAP_THRESHOLD) {
             result.x = cand.flow;
-            result.width = nodeBounds.right - cand.flow;
+            result.width = Math.max(100, nodeBounds.right - cand.flow);
             result.helperLines.push({ type: 'vertical', position: cand.flow });
-            snappedX = true;
-            break;
+            snappedX = true; break;
           }
         }
       }
     }
 
-    // --- 垂直方向 (Y 轴 / Height) ---
+    // --- 垂直方向 ---
     if (!snappedY) {
       const candidates = [
         { flow: oBounds.top, type: 'horizontal' },
@@ -108,28 +106,27 @@ export const getSmartSnapPos = (
           if (Math.abs(nodeBounds.top - cand.flow) < SNAP_THRESHOLD) {
             result.y = cand.flow;
             result.helperLines.push({ type: 'horizontal', position: cand.flow });
-            snappedY = true;
-            break;
+            snappedY = true; break;
           }
           if (Math.abs(nodeBounds.bottom - cand.flow) < SNAP_THRESHOLD) {
             result.y = cand.flow - nodeHeight;
             result.helperLines.push({ type: 'horizontal', position: cand.flow });
-            snappedY = true;
-            break;
+            snappedY = true; break;
           }
-        } else {
-          if (Math.abs(nodeBounds.bottom - cand.flow) < SNAP_THRESHOLD) {
-            result.height = cand.flow - nodeBounds.top;
+        } else if (direction) {
+          // 缩放模式：仅对正在移动的边缘进行吸附
+          // 拉动底部 (direction[1] === 1)
+          if (direction[1] === 1 && Math.abs(nodeBounds.bottom - cand.flow) < SNAP_THRESHOLD) {
+            result.height = Math.max(100, cand.flow - nodeBounds.top);
             result.helperLines.push({ type: 'horizontal', position: cand.flow });
-            snappedY = true;
-            break;
+            snappedY = true; break;
           }
-          if (Math.abs(nodeBounds.top - cand.flow) < SNAP_THRESHOLD) {
+          // 拉动顶部 (direction[1] === -1)
+          if (direction[1] === -1 && Math.abs(nodeBounds.top - cand.flow) < SNAP_THRESHOLD) {
             result.y = cand.flow;
-            result.height = nodeBounds.bottom - cand.flow;
+            result.height = Math.max(100, nodeBounds.bottom - cand.flow);
             result.helperLines.push({ type: 'horizontal', position: cand.flow });
-            snappedY = true;
-            break;
+            snappedY = true; break;
           }
         }
       }

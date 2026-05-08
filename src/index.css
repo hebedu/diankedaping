@@ -78,18 +78,9 @@
   cursor: pointer;
 }
 
-.react-flow__edge-path {
-  transition: stroke 0.3s, stroke-width 0.3s, opacity 0.3s;
-}
-
-.react-flow__edge:hover .react-flow__edge-path {
-  stroke: #3B82F6 !important;
-  stroke-width: 2.5px !important;
-}
-
 .react-flow__edge.selected .react-flow__edge-path {
   stroke: #1677FF !important;
-  stroke-width: 2.5px !important;
+  stroke-width: 3px !important;
 }
 
 /* 隐藏 React Flow 默认的选择框阴影 */
@@ -100,46 +91,117 @@
 /* React Flow Connecting States & Multi-Connection Support */
 .react-flow__handle {
   pointer-events: auto !important;
-  z-index: 20; /* 默认 Source 在上，方便拉出连线 */
 }
 
-/* 移除原有靶点样式，改为全卡片吸收层样式 */
-.react-flow__handle-target-full {
-  z-index: -1 !important; /* 平时在底层，绝对不阻挡点击 */
-  pointer-events: none !important;
-  @apply !w-full !h-full !top-0 !left-0 !transform-none !bg-transparent !border-none !rounded-xl opacity-0;
-  transition: background-color 0.2s, opacity 0.2s;
-}
-
-/* 当用户开始拉线时，反转层级，让吸收层置顶 */
-.is-connecting-line .react-flow__handle-target-full {
+/* 确保起始点手柄在最上层，方便拉线 */
+.react-flow__handle-source {
   z-index: 100 !important;
-  pointer-events: auto !important;
 }
 
-/* 拉线时悬停在某个卡片上方产生的微光反馈 */
-.is-connecting-line .react-flow__handle-target-full:hover {
-  @apply bg-blue-500/10 opacity-100 ring-2 ring-blue-400 ring-inset;
+/* 目标点手柄平时在下层 */
+.react-flow__handle-target {
+  z-index: 50 !important;
 }
 
+/* 靶点手柄基础样式 */
+.react-flow__handle {
+  @apply w-2 h-2 bg-white border-2 border-primary shadow-sm !opacity-100;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100 !important;
+}
+
+/* 悬停手柄时稍微放大 */
+.react-flow__handle:hover {
+  @apply scale-150 bg-primary border-white;
+}
+
+/* 当正在连线时，所有可用的手柄显著放大并产生雷达扩散效果 */
 .react-flow__handle-connecting,
 .react-flow__handle-valid {
-  @apply !bg-blue-600 !border-blue-100 !w-3 !h-3 -translate-x-0.5 -translate-y-0.5 shadow-xl shadow-blue-500/40 !opacity-100 !visible;
+  @apply !w-4 !h-4 !bg-primary !border-white shadow-xl;
+  animation: handle-pulse 1.5s infinite ease-in-out;
+  position: relative;
 }
 
+/* 增加雷达扩散光圈 */
+.react-flow__handle-connecting::after,
+.react-flow__handle-valid::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(22, 119, 255, 0.4);
+  animation: radar-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes radar-ping {
+  0% { width: 100%; height: 100%; opacity: 0.8; }
+  100% { width: 300%; height: 300%; opacity: 0; }
+}
+
+@keyframes handle-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0px rgba(22, 119, 255, 0.4); }
+  50% { transform: scale(1.3); box-shadow: 0 0 0 10px rgba(22, 119, 255, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0px rgba(22, 119, 255, 0.4); }
+}
+
+@keyframes border-flow {
+  0% { border-color: #1677ff; box-shadow: 0 0 0 0px rgba(22, 119, 255, 0.2); }
+  50% { border-color: #4096ff; box-shadow: 0 0 20px 4px rgba(22, 119, 255, 0.4); }
+  100% { border-color: #1677ff; box-shadow: 0 0 0 0px rgba(22, 119, 255, 0.2); }
+}
 
 .react-flow__node.connecting {
-  @apply ring-4 ring-blue-500/20 border-primary shadow-xl;
+  @apply ring-4 ring-primary/20 border-primary bg-blue-50/30 scale-[1.01] z-50;
+  animation: border-flow 1.5s infinite ease-in-out;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .react-flow__edge.react-flow__edge-connecting .react-flow__edge-path {
-  stroke: #3B82F6 !important;
-  stroke-dasharray: 5 5;
-  animation: dashdraw 0.5s linear infinite;
+  stroke: #1677ff !important;
+  stroke-dasharray: 8 8;
+  stroke-width: 3px;
+  animation: dashdraw 0.6s linear infinite;
 }
 
 @keyframes dashdraw {
-  from { stroke-dashoffset: 10; }
+  from { stroke-dashoffset: 16; }
   to { stroke-dashoffset: 0; }
 }
 
+/* 缩放器热区与手柄增强 (极致版) */
+.custom-resizer-handle {
+  @apply !bg-white !border-[1.5px] !border-primary !shadow-md transition-all duration-200 !w-3.5 !h-3.5 !rounded-[4px];
+  z-index: 1000 !important;
+}
+
+.custom-resizer-handle:hover {
+  @apply !scale-125 !bg-primary !border-white;
+}
+
+/* 增加 24px 的超级隐形感应带，并使用负 margin 实现中心对齐 */
+.react-flow__node-resizer__line.custom-resizer-line {
+  @apply !border-[12px] !border-transparent transition-all duration-200;
+  pointer-events: all !important;
+  z-index: 999 !important;
+}
+
+/* 水平线热区位移补偿 */
+.react-flow__node-resizer__line.custom-resizer-line.top,
+.react-flow__node-resizer__line.custom-resizer-line.bottom {
+  margin-top: -12px !important;
+}
+
+/* 垂直线热区位移补偿 */
+.react-flow__node-resizer__line.custom-resizer-line.left,
+.react-flow__node-resizer__line.custom-resizer-line.right {
+  margin-left: -12px !important;
+}
+
+.custom-resizer-line:hover {
+  @apply !border-primary/25 !border-dotted; /* 悬停时明显的虚线确认 */
+}
