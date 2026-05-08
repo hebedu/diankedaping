@@ -11,6 +11,7 @@ import { NodeModal } from './components/modals/NodeModal';
 import { ConnectionModal } from './components/modals/ConnectionModal';
 import { VersionDrawer } from './components/modals/VersionDrawer';
 import { PreviewBanner } from './components/topology/PreviewBanner';
+import { GuideDrawer } from './components/layout/GuideDrawer';
 import { ReactFlowProvider } from 'reactflow';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
       <NodeModal />
       <ConnectionModal />
       <VersionDrawer />
+      <GuideDrawer />
       {/* 全局顶栏 */}
       <Header />
       

@@ -31,6 +31,7 @@ interface ViewState {
   isPreviewMode: boolean;
   previewVersionId: string | null;
   previewData: Snapshot | null;
+  isGuideOpen: boolean;
 }
 
 export type ConfigStatus = '已发布' | '已保存草稿' | '有未保存修改' | '基于已发布版本编辑中';
@@ -83,6 +84,7 @@ interface AppState extends ViewState {
   setLeftPanelOpen: (isOpen: boolean) => void;
   setHoveredNodeId: (id: string | null) => void;
   setResizing: (isResizing: boolean) => void;
+  setGuideOpen: (isOpen: boolean) => void;
 
   // History Actions
   saveHistory: () => void;
@@ -223,6 +225,7 @@ export const useStore = create<AppState>((set) => ({
   future: [],
   configStatus: '基于已发布版本编辑中',
   isConnectionMode: false,
+  isGuideOpen: false,
   
   versions: [
     {
@@ -273,6 +276,7 @@ export const useStore = create<AppState>((set) => ({
   setLeftPanelOpen: (isOpen) => set({ isLeftPanelOpen: isOpen }),
   setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
   setResizing: (isResizing) => set({ isResizing }),
+  setGuideOpen: (isOpen) => set({ isGuideOpen: isOpen }),
 
   setConnectionMode: (isMode) => set({ isConnectionMode: isMode }),
 

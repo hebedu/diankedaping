@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Bot, Home, BookOpen, User, ChevronDown, HelpCircle } from 'lucide-react';
-import { GuideDrawer } from './GuideDrawer';
+import { useStore } from '../../store/useStore';
 
 export const Header = () => {
-  const [isGuideOpen, setGuideOpen] = useState(false);
+  const { setGuideOpen } = useStore();
 
   return (
     <div className="h-14 bg-panel border-b border-border flex items-center justify-between px-4 z-20 shadow-sm relative">
-      <GuideDrawer isOpen={isGuideOpen} onClose={() => setGuideOpen(false)} />
-      
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2 mr-4">
           <div className="w-6 h-6 rounded bg-primary text-white flex items-center justify-center font-bold text-xs">SRE</div>
