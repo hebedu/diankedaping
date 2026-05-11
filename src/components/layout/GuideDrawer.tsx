@@ -31,7 +31,7 @@ export const GuideDrawer = () => {
       />
       
       {/* Drawer Content */}
-      <div className="relative w-[500px] bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="relative w-[800px] max-w-[90vw] bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
         <div className="h-16 border-b border-slate-100 flex items-center justify-between px-6 bg-slate-50/50">
           <div className="flex items-center space-x-2">
@@ -75,16 +75,6 @@ export const GuideDrawer = () => {
               {guideContent}
             </ReactMarkdown>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50">
-          <button 
-            onClick={() => setGuideOpen(false)}
-            className="w-full py-3 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-100 transition-colors shadow-sm"
-          >
-            我已了解
-          </button>
         </div>
       </div>
     </div>
