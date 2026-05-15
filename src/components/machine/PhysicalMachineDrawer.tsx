@@ -337,23 +337,21 @@ const SensorsTab = () => {
                   <th className="text-left py-2 font-bold">传感器</th>
                   <th className="text-left py-2 font-bold">当前值</th>
                   <th className="text-left py-2 font-bold">状态</th>
-                  <th className="text-left py-2 font-bold">说明</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {[
-                  { name: '进风温度', val: temperature.inletTemp, desc: '机房环境温度正常' },
-                  { name: '出风温度', val: temperature.outletTemp, desc: '设备散热正常' },
-                  { name: 'CPU0 温度', val: temperature.cpu0Temp, desc: '-' },
-                  { name: 'CPU1 温度', val: temperature.cpu1Temp, desc: '-' },
-                  { name: 'PCH 温度', val: temperature.pchTemp, desc: '芯片组温度稳定' },
-                  { name: 'RAID 卡温度', val: temperature.raid0Temp, desc: '建议关注散热', isWarn: true },
+                  { name: '进风温度', val: temperature.inletTemp },
+                  { name: '出风温度', val: temperature.outletTemp },
+                  { name: 'CPU0 温度', val: temperature.cpu0Temp },
+                  { name: 'CPU1 温度', val: temperature.cpu1Temp },
+                  { name: 'PCH 温度', val: temperature.pchTemp },
+                  { name: 'RAID 卡温度', val: temperature.raid0Temp },
                 ].map((row, i) => (
                   <tr key={i}>
                     <td className="py-2 text-slate-600 font-bold">{row.name}</td>
                     <td className="py-2 font-mono">{row.val}°C</td>
                     <td className="py-2"><StatusBadge status={row.val > 45 ? 'warning' : 'ok'} /></td>
-                    <td className="py-2 text-slate-400">{row.desc}</td>
                   </tr>
                 ))}
               </tbody>
