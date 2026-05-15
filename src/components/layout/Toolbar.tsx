@@ -33,7 +33,7 @@ export const Toolbar = () => {
 
   const handleSaveDraft = () => {
     saveDraft();
-    alert('草稿已保存，可在版本历史中查看');
+    alert('编辑进度已暂存');
   };
 
   useEffect(() => {

@@ -12,12 +12,10 @@ export const VersionDrawer = () => {
     configStatus
   } = useStore();
   
-  const [activeTab, setActiveTab] = useState<'all' | 'draft' | 'published'>('all');
-
+  // Only show published versions as per requirements
   const filteredVersions = useMemo(() => {
-    if (activeTab === 'all') return versions;
-    return versions.filter(v => v.type === activeTab);
-  }, [versions, activeTab]);
+    return versions.filter(v => v.type === 'published');
+  }, [versions]);
 
   if (!isVersionDrawerOpen) return null;
 
@@ -63,34 +61,8 @@ export const VersionDrawer = () => {
         <div className="p-6 space-y-6">
           <div className="bg-primary/[0.03] border border-primary/10 rounded-2xl p-4">
             <p className="text-xs text-slate-500 leading-relaxed font-medium">
-              保存草稿和发布配置后会自动生成版本记录。<br />
-              恢复历史版本只会生成当前草稿，不会直接影响线上大屏。
+              系统仅记录正式发布的配置版本，恢复历史版本后可重新编辑并再次发布。
             </p>
-          </div>
-
-          <div className="flex p-1 bg-slate-100 rounded-xl">
-            {[
-              { id: 'all', label: '全部', count: versions.length },
-              { id: 'draft', label: '草稿版本', count: versions.filter(v => v.type === 'draft').length },
-              { id: 'published', label: '发布版本', count: versions.filter(v => v.type === 'published').length }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center ${
-                  activeTab === tab.id 
-                    ? 'bg-white text-primary shadow-sm' 
-                    : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span className={`ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] ${
-                  activeTab === tab.id ? 'bg-primary/10 text-primary' : 'bg-slate-200/50 text-slate-400'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
           </div>
         </div>
 
@@ -121,7 +93,7 @@ export const VersionDrawer = () => {
                   {/* Title Area */}
                   <div className="mb-1 px-0.5">
                     <h4 className="text-[15px] font-black text-slate-800 tracking-tight">
-                      {v.id} · {v.type === 'published' ? '发布版本' : '草稿版本'}
+                      {v.id} · 发布版本
                     </h4>
                   </div>
 

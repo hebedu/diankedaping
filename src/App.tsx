@@ -13,9 +13,10 @@ import { VersionDrawer } from './components/modals/VersionDrawer';
 import { PreviewBanner } from './components/topology/PreviewBanner';
 import { GuideDrawer } from './components/layout/GuideDrawer';
 import { ReactFlowProvider } from 'reactflow';
+import { PhysicalMachineList } from './components/machine/PhysicalMachineList';
 
 function App() {
-  const { isPreview, mode } = useStore();
+  const { isPreview, mode, activeMenu } = useStore();
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-bg text-text font-sans">
@@ -31,35 +32,43 @@ function App() {
         {/* 全局左侧菜单 */}
         <Sidebar />
 
-        {/* 主内容区（当前页内容） */}
-        <div className="flex flex-col flex-1 overflow-hidden relative bg-white m-4 rounded-xl border border-border shadow-sm">
-          {/* 拓扑编辑器顶部工具栏 */}
-          <Toolbar />
-          <PreviewBanner />
-          
-          {/* 预览模式提示 */}
-          {isPreview && !useStore.getState().isPreviewMode && (
-            <div className="bg-primary/10 text-primary py-1 px-4 text-sm text-center border-b border-primary/20 font-medium tracking-wide">
-              当前为预览模式，不会影响大屏展示
-            </div>
-          )}
-
-          {/* 编辑器主体内容 */}
-          <div className="flex flex-1 overflow-hidden relative bg-slate-50/50">
-            {/* 拓扑左侧面板 - 仅主图模式下显示，预览模式下隐藏 */}
-            {mode === 'main' && !isPreview && !useStore.getState().isPreviewMode && <LeftPanel />}
-
-            {/* 拓扑画布 (核心) */}
-            <div className="flex-1 relative h-full flex overflow-hidden">
-              <ReactFlowProvider>
-                <div className="flex-1 relative">
-                  <TopologyCanvas />
-                </div>
-                <RightPanel />
-              </ReactFlowProvider>
-            </div>
+        {/* 主内容区（根据菜单动态渲染） */}
+        {activeMenu === 'physical-machine-list' ? (
+          <div className="flex flex-col flex-1 overflow-hidden relative">
+            <PhysicalMachineList />
           </div>
-        </div>
+        ) : (
+          <div className="flex flex-col flex-1 overflow-hidden relative bg-white m-4 rounded-xl border border-border shadow-sm">
+            <>
+              {/* 拓扑编辑器顶部工具栏 */}
+              <Toolbar />
+              <PreviewBanner />
+              
+              {/* 预览模式提示 */}
+              {isPreview && !useStore.getState().isPreviewMode && (
+                <div className="bg-primary/10 text-primary py-1 px-4 text-sm text-center border-b border-primary/20 font-medium tracking-wide">
+                  当前为预览模式，不会影响大屏展示
+                </div>
+              )}
+
+              {/* 编辑器主体内容 */}
+              <div className="flex flex-1 overflow-hidden relative bg-slate-50/50">
+                {/* 拓扑左侧面板 - 仅主图模式下显示，预览模式下隐藏 */}
+                {mode === 'main' && !isPreview && !useStore.getState().isPreviewMode && <LeftPanel />}
+
+                {/* 拓扑画布 (核心) */}
+                <div className="flex-1 relative h-full flex overflow-hidden">
+                  <ReactFlowProvider>
+                    <div className="flex-1 relative">
+                      <TopologyCanvas />
+                    </div>
+                    <RightPanel />
+                  </ReactFlowProvider>
+                </div>
+              </div>
+            </>
+          </div>
+        )}
       </div>
     </div>
   );

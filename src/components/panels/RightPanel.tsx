@@ -3,8 +3,7 @@ import { useStore } from '../../store/useStore';
 import { 
   X, Server, LayoutTemplate, Link2, Trash2, Info, 
   ChevronRight, ChevronDown, Shield, Network, Layers, Database,
-  ExternalLink, Globe, Cloud, Monitor, Edit3, SwitchCamera,
-  MapPin
+  ExternalLink, Globe, Cloud, Monitor, Edit3, SwitchCamera
 } from 'lucide-react';
 import type { TopologyNode, IconType } from '../../types';
 
@@ -106,7 +105,7 @@ export const RightPanel = () => {
     if (node) {
       title = "节点详情";
       icon = <div className="p-1.5 bg-blue-50 text-primary rounded-lg">{iconMap[node.iconType]}</div>;
-      const region = regions.find(r => r.id === node.regionId);
+
       
       const subTopology = availableSubTopologies.find(t => t.id === node.relatedTopologyId);
       const nodeDevices = subTopology?.devices || [];
@@ -121,10 +120,7 @@ export const RightPanel = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-xl font-black text-slate-800 truncate tracking-tight leading-tight">{node.name}</h4>
-              <div className="flex items-center text-[12px] font-bold text-slate-400 mt-1.5">
-                <MapPin className="w-3.5 h-3.5 mr-1 text-slate-300" />
-                {region?.name || '未指定区域'}
-              </div>
+
             </div>
           </div>
 

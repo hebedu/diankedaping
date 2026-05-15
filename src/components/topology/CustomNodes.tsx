@@ -3,7 +3,7 @@ import { Handle, Position as FlowPosition, NodeToolbar, Position, NodeResizer, u
 import { 
   Server, Shield, SwitchCamera, LayoutTemplate, Network, Trash2, Edit3, 
   Monitor, Layers, Database, Globe, Cloud,
-  Info
+  Info, Cpu
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import type { TopologyNode, Region, IconType } from '../../types';
@@ -14,6 +14,7 @@ const iconMap: Record<IconType, React.ReactNode> = {
   'firewall': <Shield className="w-5 h-5" />,
   'router': <Network className="w-5 h-5" />,
   'switch': <SwitchCamera className="w-5 h-5" />,
+  'core-switch': <Cpu className="w-5 h-5" />,
   'server': <Server className="w-5 h-5" />,
   'terminal': <Monitor className="w-5 h-5" />,
   'middleware': <Layers className="w-5 h-5" />,

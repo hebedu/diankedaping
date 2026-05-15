@@ -3,6 +3,7 @@ export type IconType =
   | 'firewall'
   | 'router'
   | 'switch'
+  | 'core-switch'
   | 'server'
   | 'terminal'
   | 'middleware'

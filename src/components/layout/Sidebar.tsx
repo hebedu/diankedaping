@@ -12,6 +12,7 @@ import {
   LayoutTemplate,
   ChevronDown
 } from 'lucide-react';
+import { useStore } from '../../store/useStore';
 
 interface NavMenuItemProps {
   icon: React.ElementType;
@@ -63,8 +64,23 @@ const NavMenuItem = ({
   );
 };
 
-const SubMenuItem = ({ label }: { label: string }) => (
-  <div className="px-4 py-1.5 text-xs text-muted hover:text-primary hover:bg-bg rounded cursor-pointer transition-colors">
+const SubMenuItem = ({ 
+  label, 
+  isActive = false, 
+  onClick 
+}: { 
+  label: string; 
+  isActive?: boolean; 
+  onClick?: () => void;
+}) => (
+  <div 
+    onClick={onClick}
+    className={`px-4 py-1.5 text-xs rounded cursor-pointer transition-colors ${
+      isActive 
+        ? 'text-primary bg-primary/5 font-medium' 
+        : 'text-muted hover:text-primary hover:bg-bg'
+    }`}
+  >
     {label}
   </div>
 );
@@ -74,6 +90,7 @@ export const Sidebar = () => {
     'infrastructure': true,
     'alerts': false
   });
+  const { activeMenu, setActiveMenu } = useStore();
 
   const toggleMenu = (id: string) => {
     setOpenMenus(prev => ({
@@ -86,7 +103,12 @@ export const Sidebar = () => {
     <div className="w-64 bg-panel border-r border-border h-full flex flex-col text-sm shadow-sm z-20">
       <div className="flex-1 overflow-y-auto py-4 scrollbar-hide">
         {/* Main Menu */}
-        <NavMenuItem icon={LayoutDashboard} label="仪表盘" />
+        <NavMenuItem 
+          icon={LayoutDashboard} 
+          label="仪表盘" 
+          isActive={activeMenu === 'dashboard'}
+          onToggle={() => setActiveMenu('dashboard')}
+        />
         
         <NavMenuItem 
           icon={Bell} 
@@ -101,7 +123,12 @@ export const Sidebar = () => {
 
         <div className="mt-6 mb-2 px-6 text-[11px] text-muted font-bold uppercase tracking-wider opacity-60">全景监控</div>
         
-        <NavMenuItem icon={Activity} label="应用性能监控" />
+        <NavMenuItem 
+          icon={Activity} 
+          label="应用性能监控" 
+          isActive={activeMenu === 'apm'}
+          onToggle={() => setActiveMenu('apm')}
+        />
         
         <NavMenuItem 
           icon={Server} 
@@ -110,13 +137,27 @@ export const Sidebar = () => {
           isOpen={openMenus['infrastructure']}
           onToggle={() => toggleMenu('infrastructure')}
         >
-          <SubMenuItem label="机器列表" />
+          <SubMenuItem 
+            label="机器列表" 
+            isActive={activeMenu === 'machine-list'}
+            onClick={() => setActiveMenu('machine-list')}
+          />
+          <SubMenuItem 
+            label="物理机列表" 
+            isActive={activeMenu === 'physical-machine-list'}
+            onClick={() => setActiveMenu('physical-machine-list')}
+          />
           <SubMenuItem label="容器列表" />
           <SubMenuItem label="网络设备" />
           <SubMenuItem label="进程监控" />
         </NavMenuItem>
 
-        <NavMenuItem icon={LayoutTemplate} label="大屏拓扑配置" isActive />
+        <NavMenuItem 
+          icon={LayoutTemplate} 
+          label="大屏拓扑配置" 
+          isActive={activeMenu === 'topology-config'} 
+          onToggle={() => setActiveMenu('topology-config')}
+        />
 
         <NavMenuItem icon={Users} label="用户访问监控" />
 

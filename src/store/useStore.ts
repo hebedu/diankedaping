@@ -32,6 +32,7 @@ interface ViewState {
   previewVersionId: string | null;
   previewData: Snapshot | null;
   isGuideOpen: boolean;
+  activeMenu: string;
 }
 
 export type ConfigStatus = '已发布' | '已保存草稿' | '有未保存修改' | '基于已发布版本编辑中';
@@ -112,6 +113,7 @@ interface AppState extends ViewState {
   addConnection: (conn: Connection) => void;
   updateConnection: (id: string, conn: Partial<Connection>) => void;
   removeConnection: (id: string) => void;
+  setActiveMenu: (menuId: string) => void;
 }
 
 // 预置 Mock 数据
@@ -235,26 +237,15 @@ export const useStore = create<AppState>((set) => ({
       operator: '管理员',
       isActive: true,
       data: { nodes: initialNodes, connections: initialConnections, regions: initialRegions }
-    },
-    {
-      id: 'D2',
-      type: 'draft',
-      timestamp: '2024-05-01 09:45:00',
-      operator: '管理员',
-      data: { nodes: initialNodes, connections: initialConnections, regions: initialRegions }
-    },
-    {
-      id: 'D1',
-      type: 'draft',
-      timestamp: '2024-05-01 09:30:00',
-      operator: '管理员',
-      data: { nodes: initialNodes, connections: initialConnections, regions: initialRegions }
     }
   ],
   isVersionDrawerOpen: false,
   isPreviewMode: false,
   previewVersionId: null,
   previewData: null,
+  activeMenu: 'topology-config',
+
+  setActiveMenu: (menuId) => set({ activeMenu: menuId }),
 
   saveHistory: () => set((state) => {
     const snapshot: Snapshot = {
@@ -281,20 +272,8 @@ export const useStore = create<AppState>((set) => ({
   setConnectionMode: (isMode) => set({ isConnectionMode: isMode }),
 
   saveDraft: () => set((state) => {
-    const newVersion: TopologyVersion = {
-      id: `D${state.versions.filter(v => v.type === 'draft').length + 1}`,
-      type: 'draft',
-      timestamp: new Date().toLocaleString(),
-      operator: '管理员',
-      data: {
-        nodes: state.nodes,
-        connections: state.connections,
-        regions: state.regions
-      }
-    };
     return { 
-      configStatus: '已保存草稿',
-      versions: [newVersion, ...state.versions]
+      configStatus: '已保存草稿'
     };
   }),
   

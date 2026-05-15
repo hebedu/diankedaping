@@ -3,7 +3,7 @@ import { useStore } from '../../store/useStore';
 import { 
   X, Server, LayoutTemplate, Edit3, Plus, AlertCircle, 
   Info, ExternalLink, Shield, Network, SwitchCamera, 
-  Monitor, Layers 
+  Monitor, Layers, Cpu 
 } from 'lucide-react';
 import { ResourcePicker } from './ResourcePicker';
 import type { TopologyNode, IconType } from '../../types';
@@ -14,6 +14,7 @@ const nodeIcons: { type: IconType; label: string; icon: React.ReactNode }[] = [
   { type: 'firewall', label: '防火墙', icon: <Shield className="w-5 h-5" /> },
   { type: 'router', label: '路由器', icon: <Network className="w-5 h-5" /> },
   { type: 'switch', label: '交换机', icon: <SwitchCamera className="w-5 h-5" /> },
+  { type: 'core-switch', label: '核心交换机', icon: <Cpu className="w-5 h-5" /> },
   { type: 'server', label: '服务器', icon: <Server className="w-5 h-5" /> },
   { type: 'terminal', label: '终端', icon: <Monitor className="w-5 h-5" /> },
   { type: 'subTopology', label: '集群', icon: <LayoutTemplate className="w-5 h-5" /> },
